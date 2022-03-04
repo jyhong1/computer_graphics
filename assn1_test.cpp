@@ -4,6 +4,7 @@
 #include <glm/vec3.hpp>
 #include <vector>
 
+//git test
 void display() {
 	glClear(GL_COLOR_BUFFER_BIT);
 	glBegin(GL_LINES);
