@@ -7,20 +7,45 @@
 
 //rectangle is moving with the line.
 
-typedef struct rect {
+class Line {
+public:
+	float x1, x2, y1, y2;
+	float width;
+};
+
+class GunBarrel : public Line {
+	float dx, dy;
+};
+
+class Rect {
+public:
 	float x;
 	float y;
 	float width;
 	float height;
-}rect;
+};
 
-typedef struct circle {
-	float dx;
+class Circle {
+public:
 	float r;
-}cir;
+};
 
-rect lowerBody;
-cir upperBody;
+class UpperBody : public Circle {
+public:
+	float dx;
+};
+
+class CannonBall : public UpperBody {
+public:
+	float dy;
+	float initSpeed;
+	float t;
+	bool isFlying;
+};
+
+Rect lowerBody;
+UpperBody upperBody;
+CannonBall cannonBall;
 
 void init() {
 	glClearColor(0.0, 0.0, 0.0, 0.0); //black
@@ -33,10 +58,39 @@ void init() {
 
 	upperBody.dx = 0.0;
 	upperBody.r = 0.12;
+
+	cannonBall.dx = 0.0;
+	cannonBall.dy = 0.0;
+	cannonBall.r = 0.05;
+	cannonBall.isFlying = false;
+	cannonBall.t = 0;
+	cannonBall.initSpeed = 30;
+}
+
+void reshape(int w, int h) {
+	glViewport(0.0, 0.0, w, h);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(-5, 5, -5, 5);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 }
 
 void display() {
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	if (cannonBall.isFlying)
+		glColor3f(1.0, 1.0, 1.0);
+	else
+		glColor3f(0.0, 0.0, 0.0);
+	glBegin(GL_POLYGON); //https://blog.amaorche.com/25 circle
+	for (int i = 0; i < 360; i++) {
+		float angle = i * 3.141592653589793238462643383279502884197169399375105820974944 / 180;
+		float x = cannonBall.r * cos(angle);
+		float y = cannonBall.r * sin(angle);
+		glVertex2f(x + cannonBall.dx, y + cannonBall.dy);
+	}
+	glEnd();
 
 	glBegin(GL_QUADS); //사각형
 	glColor3f(1.0, 1.0, 1.0); //white
@@ -55,16 +109,45 @@ void display() {
 	}
 	glEnd();
 
-	glLineWidth(5.0); //begin 전에 선언해줘야함. 왜?
+	glLineWidth(3.0);
+	glBegin(GL_LINES); // gun barrel
+	glColor3f(1.0, 1.0, 1.0); //white
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(0.3, 0.2, 0.0);
+	glEnd();
+
+	glLineWidth(5.0);
 	glBegin(GL_LINES); // 땅(ground)
 	glColor3f(1.0, 0.0, 0.0); //red
 	glVertex3f(1.0, -0.3, 0.0);
 	glVertex3f(-1.0, -0.3, 0.0);
 	glEnd();
 
-
-
 	glutSwapBuffers();
+}
+
+void timer(int v) {
+	if (cannonBall.isFlying) {
+		cannonBall.t += 1;
+		cannonBall.dx += 0.05;
+		cannonBall.dy += 0.001 * (-4.9 * cannonBall.t * cannonBall.t + 30 * cannonBall.t);
+		if (cannonBall.dy <= -0.3) {
+			cannonBall.isFlying = false;
+			cannonBall.t = 0;
+		}
+		glutPostRedisplay();
+	}
+	glutTimerFunc(1000 / 60, timer, v);
+}
+
+void keyboard(unsigned char key, int x, int y) {
+	if (key == ' ') {
+		cannonBall.dx = 0;
+		cannonBall.dy = 0;
+		cannonBall.t = 0;
+		cannonBall.isFlying = true;
+	}
+	glutPostRedisplay();
 }
 
 void specialkeyboard(int key, int x, int y) { //moving tank
@@ -92,7 +175,9 @@ void main(int argc, char** argv) {
 	init(); //essential
 
 	glutDisplayFunc(display);
-	//glutReshapeFunc(reshape);
+	glutReshapeFunc(reshape);
+	glutTimerFunc(100, timer, 0);	//https://cs.lmu.edu/~ray/notes/openglexamples/ spinning square
+	glutKeyboardFunc(keyboard);
 	glutSpecialFunc(specialkeyboard);
 	glutMainLoop();
 
