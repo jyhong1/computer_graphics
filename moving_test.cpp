@@ -43,16 +43,58 @@ public:
 	bool isFlying;
 };
 
+class Wheel : public Circle {
+public:
+	float dx;
+	float line1_x;
+	float line1_y;
+
+	float line2_x;
+	float line2_y;
+};
+
 Rect lowerBody;
 UpperBody upperBody;
 CannonBall cannonBall;
+Wheel wheel1;
+Wheel wheel2;
+Wheel wheel3;
+Wheel wheel4;
 
 void init() {
 	glClearColor(0.0, 0.0, 0.0, 0.0); //black
 	glShadeModel(GL_FLAT);
 
+	wheel1.dx = -0.2;
+	wheel1.r = 0.06;
+	wheel1.line1_x = -wheel1.r + wheel1.dx;
+	wheel1.line1_y = -0.3 + wheel1.r;
+	wheel1.line2_x = wheel1.r + wheel1.dx;
+	wheel1.line2_y = -0.3 + wheel1.r;
+
+	wheel2.dx = -0.2 + 0.12;
+	wheel2.r = 0.06;
+	wheel2.line1_x = -wheel2.r + wheel2.dx;
+	wheel2.line1_y = -0.3 + wheel2.r;
+	wheel2.line2_x = wheel2.r + wheel2.dx;
+	wheel2.line2_y = -0.3 + wheel2.r;
+
+	wheel3.dx = -0.2 + 0.24;
+	wheel3.r = 0.06;
+	wheel3.line1_x = -wheel3.r + wheel3.dx;
+	wheel3.line1_y = -0.3 + wheel3.r;
+	wheel3.line2_x = wheel3.r + wheel3.dx;
+	wheel3.line2_y = -0.3 + wheel3.r;
+
+	wheel4.dx = -0.2 + 0.36;
+	wheel4.r = 0.06;
+	wheel4.line1_x = -wheel4.r + wheel4.dx;
+	wheel4.line1_y = -0.3 + wheel4.r;
+	wheel4.line2_x = wheel4.r + wheel4.dx;
+	wheel4.line2_y = -0.3 + wheel4.r;
+
 	lowerBody.x = -0.3;
-	lowerBody.y = -0.3;
+	lowerBody.y = -0.3 + (wheel1.r * 2);
 	lowerBody.width = 0.3;
 	lowerBody.height = 0.6;
 
@@ -65,13 +107,15 @@ void init() {
 	cannonBall.isFlying = false;
 	cannonBall.t = 0;
 	cannonBall.initSpeed = 30;
+
+	
 }
 
 void reshape(int w, int h) {
 	glViewport(0.0, 0.0, w, h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluOrtho2D(-5, 5, -5, 5);
+	gluOrtho2D(-1, 1, -1, 1);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
@@ -83,6 +127,7 @@ void display() {
 		glColor3f(1.0, 1.0, 1.0);
 	else
 		glColor3f(0.0, 0.0, 0.0);
+
 	glBegin(GL_POLYGON); //https://blog.amaorche.com/25 circle
 	for (int i = 0; i < 360; i++) {
 		float angle = i * 3.141592653589793238462643383279502884197169399375105820974944 / 180;
@@ -105,15 +150,91 @@ void display() {
 		float angle = i * 3.141592 / 180;
 		float x = upperBody.r * cos(angle);
 		float y = upperBody.r * sin(angle);
-		glVertex2f(x + upperBody.dx, y);
+		glVertex2f(x + upperBody.dx, y + (wheel1.r * 2));
+	}
+	glEnd();
+
+	/*making wheel begin*/
+	glBegin(GL_POLYGON); //https://blog.amaorche.com/25 circle
+	glColor3f(1.0, 1.0, 0.7); //ivory
+
+	for (int i = 0; i < 360; i++) {
+		float angle = i * 3.141592 / 180;
+		float x = wheel1.r * cos(angle);
+		float y = wheel1.r * sin(angle);
+		glVertex2f(x + wheel1.dx, y - 0.3 + wheel1.r);
 	}
 	glEnd();
 
 	glLineWidth(3.0);
+	glBegin(GL_LINES); // ¹ÙÄû »ì
+	glColor3f(0.0, 0.0, 0.0); //white
+	glVertex3f(wheel1.line1_x, wheel1.line1_y, 0.0);
+	glVertex3f(wheel1.line2_x, wheel1.line2_y, 0.0);
+	glEnd();
+
+	glBegin(GL_POLYGON); //https://blog.amaorche.com/25 circle
+	glColor3f(1.0, 1.0, 0.7); //ivory
+
+	for (int i = 0; i < 360; i++) {
+		float angle = i * 3.141592 / 180;
+		float x = wheel2.r * cos(angle);
+		float y = wheel2.r * sin(angle);
+		glVertex2f(x + wheel2.dx, y - 0.3 + wheel2.r);
+	}
+	glEnd();
+
+	glLineWidth(3.0);
+	glBegin(GL_LINES); // ¹ÙÄû »ì
+	glColor3f(0.0, 0.0, 0.0); //white
+	glVertex3f(wheel2.line1_x, wheel2.line1_y, 0.0);
+	glVertex3f(wheel2.line2_x, wheel2.line2_y, 0.0);
+	glEnd();
+
+	glBegin(GL_POLYGON); //https://blog.amaorche.com/25 circle
+	glColor3f(1.0, 1.0, 0.7); //ivory
+
+	for (int i = 0; i < 360; i++) {
+		float angle = i * 3.141592 / 180;
+		float x = wheel3.r * cos(angle);
+		float y = wheel3.r * sin(angle);
+		glVertex2f(x + wheel3.dx, y - 0.3 + wheel3.r);
+	}
+	glEnd();
+
+	glLineWidth(3.0);
+	glBegin(GL_LINES); // ¹ÙÄû »ì
+	glColor3f(0.0, 0.0, 0.0); //white
+	glVertex3f(wheel3.line1_x, wheel3.line1_y, 0.0);
+	glVertex3f(wheel3.line2_x, wheel3.line2_y, 0.0);
+	glEnd();
+
+	glBegin(GL_POLYGON); //https://blog.amaorche.com/25 circle
+	glColor3f(1.0, 1.0, 0.7); //ivory
+
+	for (int i = 0; i < 360; i++) {
+		float angle = i * 3.141592 / 180;
+		float x = wheel4.r * cos(angle);
+		float y = wheel4.r * sin(angle);
+		glVertex2f(x + wheel4.dx, y - 0.3 + wheel4.r);
+	}
+	glEnd();
+
+	glLineWidth(3.0);
+	glBegin(GL_LINES); // ¹ÙÄû »ì
+	glColor3f(0.0, 0.0, 0.0); //white
+	glVertex3f(wheel4.line1_x, wheel4.line1_y, 0.0);
+	glVertex3f(wheel4.line2_x, wheel4.line2_y, 0.0);
+	glEnd();
+
+	/*making wheel end*/
+
+
+	glLineWidth(3.0);
 	glBegin(GL_LINES); // gun barrel
 	glColor3f(1.0, 1.0, 1.0); //white
-	glVertex3f(0.0, 0.0, 0.0);
-	glVertex3f(0.3, 0.2, 0.0);
+	glVertex3f(0.0, 0.0 + (wheel1.r*2), 0.0);
+	glVertex3f(0.3, 0.2 + (wheel1.r * 2), 0.0);
 	glEnd();
 
 	glLineWidth(5.0);
@@ -128,7 +249,7 @@ void display() {
 
 void timer(int v) {
 	if (cannonBall.isFlying) {
-		cannonBall.t += 1;
+		cannonBall.t += 0.1;
 		cannonBall.dx += 0.05;
 		cannonBall.dy += 0.001 * (-4.9 * cannonBall.t * cannonBall.t + 30 * cannonBall.t);
 		if (cannonBall.dy <= -0.3) {
@@ -155,11 +276,35 @@ void specialkeyboard(int key, int x, int y) { //moving tank
 	case GLUT_KEY_RIGHT:
 		lowerBody.x += 0.01;
 		upperBody.dx += 0.01;
+		wheel1.dx += 0.01;
+		wheel1.line1_x += 0.01;
+		wheel1.line2_x += 0.01;
+		wheel2.dx += 0.01;
+		wheel2.line1_x += 0.01;
+		wheel2.line2_x += 0.01;
+		wheel3.dx += 0.01;
+		wheel3.line1_x += 0.01;
+		wheel3.line2_x += 0.01;
+		wheel4.dx += 0.01;
+		wheel4.line1_x += 0.01;
+		wheel4.line2_x += 0.01;
 		break;
 
 	case GLUT_KEY_LEFT:
 		lowerBody.x -= 0.01;
 		upperBody.dx -= 0.01;
+		wheel1.dx -= 0.01;
+		wheel1.line1_x -= 0.01;
+		wheel1.line2_x -= 0.01;
+		wheel2.dx -= 0.01;
+		wheel2.line1_x -= 0.01;
+		wheel2.line2_x -= 0.01;
+		wheel3.dx -= 0.01;
+		wheel3.line1_x -= 0.01;
+		wheel3.line2_x -= 0.01;
+		wheel4.dx -= 0.01;
+		wheel4.line1_x -= 0.01;
+		wheel4.line2_x -= 0.01;
 		break;
 	}
 	glutPostRedisplay();
