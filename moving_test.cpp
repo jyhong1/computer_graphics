@@ -5,6 +5,9 @@
 #include <vector>
 #include <math.h>
 
+#define scaleFactor 0.01
+
+using namespace std;
 //rectangle is moving with the line.
 
 class Ground {
@@ -103,7 +106,7 @@ Ground ground;
 GunBarrel gunBarrel;
 LowerBody lowerBody;
 UpperBody upperBody;
-CannonBall cannonBall;
+vector<CannonBall> cannonBalls;
 
 void init() {
 	glClearColor(0.0, 0.0, 0.0, 0.0); //black
@@ -113,7 +116,6 @@ void init() {
 	gunBarrel.init();
 	lowerBody.init();
 	upperBody.init();
-	cannonBall.init();
 }
 
 void reshape(int w, int h) {
@@ -128,18 +130,21 @@ void reshape(int w, int h) {
 void display() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	if (cannonBall.isFlying)
-		glColor3f(1.0, 1.0, 0.0);
-	else
-		glColor3f(0.0, 0.0, 0.0);
-	glBegin(GL_POLYGON); //https://blog.amaorche.com/25 circle
-	for (int i = 0; i < 360; i++) {
-		float angle = i * 3.14159265 / 180;
-		float x = cannonBall.r * cos(angle);
-		float y = cannonBall.r * sin(angle);
-		glVertex2f(x + cannonBall.dx, y + cannonBall.dy);
+	vector<CannonBall>::iterator c;
+	for (c = cannonBalls.begin(); c != cannonBalls.end(); c++) {
+		if (c->isFlying)
+			glColor3f(1.0, 1.0, 0.0);
+		else
+			glColor3f(0.0, 0.0, 0.0);
+		glBegin(GL_POLYGON); //https://blog.amaorche.com/25 circle
+		for (int i = 0; i < 360; i++) {
+			float angle = i * 3.14159265 / 180;
+			float x = c->r * cos(angle);
+			float y = c->r * sin(angle);
+			glVertex2f(x + c->dx, y + c->dy);
+		}
+		glEnd();
 	}
-	glEnd();
 
 	glBegin(GL_QUADS); //»ç°¢Çü
 	glColor3f(1.0, 1.0, 1.0); //white
@@ -149,7 +154,7 @@ void display() {
 	glVertex2f(lowerBody.x + lowerBody.height, lowerBody.y);
 	glEnd();
 
-	glBegin(GL_POLYGON); //https://blog.amaorche.com/25 circle
+	glBegin(GL_POLYGON);
 	for (int i = 0; i < 360; i++) {
 		float angle = i * 3.141592 / 180;
 		float x = upperBody.r * cos(angle);
@@ -176,25 +181,35 @@ void display() {
 }
 
 void timer(int v) {
-	if (cannonBall.isFlying) {
-		cannonBall.t += 0.05;
-		cannonBall.dx += 0.01 * cannonBall.initSpeed * (gunBarrel.x2 - gunBarrel.x1);
-		cannonBall.dy += 0.01 * (-9.8 * cannonBall.t + cannonBall.initSpeed * (gunBarrel.y2 - gunBarrel.y1));
-		if (cannonBall.dy <= -0.3) {
-			cannonBall.isFlying = false;
-			cannonBall.t = 0;
+	vector<CannonBall>::iterator c;
+	for (c = cannonBalls.begin(); c != cannonBalls.end(); c++) {
+		if (c->isFlying) {
+			c->t += 0.05;
+			c->dx += scaleFactor * c->initSpeed * (gunBarrel.x2 - gunBarrel.x1);
+			c->dy += scaleFactor * (-9.8 * c->t + c->initSpeed * (gunBarrel.y2 - gunBarrel.y1));
+			if (c->dy - c->r <= -0.3) {
+				c->isFlying = false;
+				c->t = 0;
+			}
+			glutPostRedisplay();
 		}
-		glutPostRedisplay();
 	}
+	while (!cannonBalls.empty() && !cannonBalls.begin()->isFlying) {
+		cannonBalls.erase(cannonBalls.begin());
+	}
+
 	glutTimerFunc(1000 / 60, timer, v);
 }
 
 void keyboard(unsigned char key, int x, int y) {
 	if (key == ' ') {
-		cannonBall.dx = gunBarrel.getX2();
-		cannonBall.dy = gunBarrel.getY2();
-		cannonBall.t = 0;
-		cannonBall.isFlying = true;
+		CannonBall c;
+		c.init();
+		c.dx = gunBarrel.getX2();
+		c.dy = gunBarrel.getY2();
+		c.t = 0;
+		c.isFlying = true;
+		cannonBalls.push_back(c);
 	}
 	glutPostRedisplay();
 }
