@@ -8,7 +8,6 @@
 #define scaleFactor 0.01
 
 using namespace std;
-//rectangle is moving with the line.
 
 class Ground {
 public:
@@ -57,14 +56,14 @@ public:
 
 class LowerBody {
 public:
-	float x;
-	float y;
 	float width;
 	float height;
+	float dx;
+	float dy;
 
 	void init() {
-		x = -0.3;
-		y = -0.21;
+		dx = -0.3;
+		dy = -0.21;
 		width = 0.6;
 		height = 0.2;
 	}
@@ -78,16 +77,17 @@ public:
 class UpperBody : public Circle {
 public:
 	float dx;
+	float dy;
 
 	void init() {
 		dx = 0.0;
+		dy = 0.0;
 		r = 0.12;
 	}
 };
 
 class CannonBall : public UpperBody {
 public:
-	float dy;
 	float initSpeed;
 	float t;
 	bool isFlying;
@@ -104,7 +104,6 @@ public:
 
 class Wheel : public UpperBody {
 public:
-	float dy;
 	float line1_x;
 	float line1_y;
 
@@ -130,7 +129,7 @@ vector<CannonBall> cannonBalls;
 vector<Wheel> wheels;
 
 void init() {
-	glClearColor(0.0, 0.0, 0.0, 0.0); //black
+	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glShadeModel(GL_FLAT);
 
 	ground.init();
@@ -163,7 +162,7 @@ void display() {
 			glColor3f(1.0, 1.0, 0.0);
 		else
 			glColor3f(0.0, 0.0, 0.0);
-		glBegin(GL_POLYGON); //https://blog.amaorche.com/25 circle
+		glBegin(GL_POLYGON); // Canon Balls // https://blog.amaorche.com/25 drawing circle
 		for (int i = 0; i < 360; i++) {
 			angle = i * 3.14159265 / 180;
 			x = c->r * cos(angle);
@@ -173,12 +172,12 @@ void display() {
 		glEnd();
 	}
 
-	glBegin(GL_QUADS); //»ç°¢Çü
-	glColor3f(1.0, 1.0, 1.0); //white
-	glVertex2f(lowerBody.x, lowerBody.y);
-	glVertex2f(lowerBody.x, lowerBody.y + lowerBody.height);
-	glVertex2f(lowerBody.x + lowerBody.width, lowerBody.y + lowerBody.height);
-	glVertex2f(lowerBody.x + lowerBody.width, lowerBody.y);
+	glBegin(GL_QUADS); //Lower Body
+	glColor3f(1.0, 1.0, 1.0);
+	glVertex2f(lowerBody.dx, lowerBody.dy);
+	glVertex2f(lowerBody.dx, lowerBody.dy + lowerBody.height);
+	glVertex2f(lowerBody.dx + lowerBody.width, lowerBody.dy + lowerBody.height);
+	glVertex2f(lowerBody.dx + lowerBody.width, lowerBody.dy);
 	glEnd();
 
 	glBegin(GL_POLYGON);
@@ -191,15 +190,15 @@ void display() {
 	glEnd();
 
 	glLineWidth(gunBarrel.width);
-	glBegin(GL_LINES); // gun barrel
-	glColor3f(1.0, 1.0, 1.0); //white
+	glBegin(GL_LINES); // Gun Barrel
+	glColor3f(1.0, 1.0, 1.0);
 	glVertex3f(gunBarrel.getX1(), gunBarrel.getY1(), 0.0);
 	glVertex3f(gunBarrel.getX2(), gunBarrel.getY2(), 0.0);
 	glEnd();
 
 	vector<Wheel>::iterator w;
 	for (w = wheels.begin(); w != wheels.end(); w++) {
-		glBegin(GL_POLYGON);
+		glBegin(GL_POLYGON);	// wheels
 		glColor3f(1.0, 1.0, 1.0);
 		for (int i = 0; i < 360; i++) {
 			angle = i * 3.141592 / 180;
@@ -220,36 +219,22 @@ void display() {
 		}
 		glEnd();
 
-		glBegin(GL_LINES); // ¹ÙÄû »ì
-		glColor3f(0.7, 0.7, 0.7);
-		glVertex3f(w->line1_x + w->dx, w->line1_y, 0.0);
-		glVertex3f(w->line2_x + w->dx, w->line2_y, 0.0);
-		glEnd();
-
-		glTranslatef(w->dx, w->dy, 0);
-		glRotatef(60.0f, 0.0f, 0.0f, 1.0f);
-		glTranslatef(-w->dx, -w->dy, 0);
-		glBegin(GL_LINES); // ¹ÙÄû »ì
-		glColor3f(0.7, 0.7, 0.7);
-		glVertex3f(w->line1_x + w->dx, w->line1_y, 0.0);
-		glVertex3f(w->line2_x + w->dx, w->line2_y, 0.0);
-		glEnd();
-		glLoadIdentity();
-
-		glTranslatef(w->dx, w->dy, 0);
-		glRotatef(120.0f, 0.0f, 0.0f, 1.0f);
-		glTranslatef(-w->dx, -w->dy, 0);
-		glBegin(GL_LINES); // ¹ÙÄû »ì
-		glColor3f(0.7, 0.7, 0.7);
-		glVertex3f(w->line1_x + w->dx, w->line1_y, 0.0);
-		glVertex3f(w->line2_x + w->dx, w->line2_y, 0.0);
-		glEnd();
-		glLoadIdentity();
+		for (int i = 0; i < 3; i++) {
+			glTranslatef(w->dx, w->dy, 0);	// https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glTranslate.xml
+			glRotatef(60.0f * i, 0.0f, 0.0f, 1.0f);	// https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glRotate.xml
+			glTranslatef(-w->dx, -w->dy, 0);
+			glBegin(GL_LINES); // spokes to show the rotation well
+			glColor3f(0.7, 0.7, 0.7);
+			glVertex3f(w->line1_x + w->dx, w->line1_y, 0.0);
+			glVertex3f(w->line2_x + w->dx, w->line2_y, 0.0);
+			glEnd();
+			glLoadIdentity();
+		}
 	}
 
 	glLineWidth(ground.width);
-	glBegin(GL_LINES); // ¶¥(ground)
-	glColor3f(1.0, 0.0, 0.0); //red
+	glBegin(GL_LINES); // ground
+	glColor3f(1.0, 0.0, 0.0);
 	glVertex3f(ground.x1, ground.y1, 0.0);
 	glVertex3f(ground.x2, ground.y2, 0.0);
 	glEnd();
@@ -279,7 +264,7 @@ void timer(int v) {
 }
 
 void keyboard(unsigned char key, int x, int y) {
-	if (key == ' ') {
+	if (key == ' ') {	// shooting cannon balls
 		CannonBall c;
 		c.init();
 		c.dx = gunBarrel.getX2();
@@ -295,9 +280,9 @@ void specialkeyboard(int key, int x, int y) { //moving tank
 	vector<Wheel>::iterator w;
 	switch (key) {
 	case GLUT_KEY_RIGHT:
-		if (lowerBody.x + lowerBody.width >= ground.x2)
+		if (lowerBody.dx + lowerBody.width >= ground.x2)
 			break;
-		lowerBody.x += 0.01;
+		lowerBody.dx += 0.01;
 		upperBody.dx += 0.01;
 		gunBarrel.dx += 0.01;
 		for (w = wheels.begin(); w != wheels.end(); w++) {
@@ -306,9 +291,9 @@ void specialkeyboard(int key, int x, int y) { //moving tank
 		break;
 
 	case GLUT_KEY_LEFT:
-		if (lowerBody.x <= ground.x1)
+		if (lowerBody.dx <= ground.x1)
 			break;
-		lowerBody.x -= 0.01;
+		lowerBody.dx -= 0.01;
 		upperBody.dx -= 0.01;
 		gunBarrel.dx -= 0.01;
 		for (w = wheels.begin(); w != wheels.end(); w++) {
@@ -326,11 +311,11 @@ void main(int argc, char** argv) {
 	glutInitWindowSize(700, 700);
 
 	glutCreateWindow("fortress_test");
-	init(); //essential
+	init();
 
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
-	glutTimerFunc(100, timer, 0);	//https://cs.lmu.edu/~ray/notes/openglexamples/ spinning square
+	glutTimerFunc(100, timer, 0);	//https://cs.lmu.edu/~ray/notes/openglexamples/ spinning square examples for moving cannonBalls
 	glutKeyboardFunc(keyboard);
 	glutSpecialFunc(specialkeyboard);
 	glutMainLoop();
