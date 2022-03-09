@@ -9,7 +9,7 @@
 
 using namespace std;
 
-class Ground {
+class Ground { //¶¥(red line)
 public:
 	float x1, x2, y1, y2;
 	float width;
@@ -23,7 +23,7 @@ public:
 	}
 };
 
-class GunBarrel : public Ground {
+class GunBarrel : public Ground { //Æ÷½Å
 public:
 	float dx, dy;
 
@@ -54,7 +54,7 @@ public:
 	}
 };
 
-class LowerBody {
+class LowerBody { //ÅÊÅ© ÇÏºÎ
 public:
 	float width;
 	float height;
@@ -69,12 +69,12 @@ public:
 	}
 };
 
-class Circle {
+class Circle { //¿ø
 public:
 	float r;
 };
 
-class UpperBody : public Circle {
+class UpperBody : public Circle { //ÅÊÅ© »óºÎ(¿ø)
 public:
 	float dx;
 	float dy;
@@ -86,7 +86,7 @@ public:
 	}
 };
 
-class CannonBall : public UpperBody {
+class CannonBall : public UpperBody { //Æ÷Åº
 public:
 	float initSpeed;
 	float t;
@@ -102,7 +102,7 @@ public:
 	}
 };
 
-class Wheel : public UpperBody {
+class Wheel : public UpperBody { //ÅÊÅ©ÀÇ ¹ÙÄû
 public:
 	float line1_x;
 	float line1_y;
@@ -157,7 +157,7 @@ void display() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	vector<CannonBall>::iterator c;
-	for (c = cannonBalls.begin(); c != cannonBalls.end(); c++) {
+	for (c = cannonBalls.begin(); c != cannonBalls.end(); c++) { //Æ÷Åº
 		if (c->isFlying)
 			glColor3f(1.0, 1.0, 0.0);
 		else
@@ -172,6 +172,7 @@ void display() {
 		glEnd();
 	}
 
+	// ÅÊÅ© ÇÏºÎ(Á÷»ç°¢Çü)
 	glBegin(GL_QUADS); //Lower Body
 	glColor3f(1.0, 1.0, 1.0);
 	glVertex2f(lowerBody.dx, lowerBody.dy);
@@ -180,6 +181,7 @@ void display() {
 	glVertex2f(lowerBody.dx + lowerBody.width, lowerBody.dy);
 	glEnd();
 
+	//ÅÊÅ© »óºÎ(¿ø)
 	glBegin(GL_POLYGON);
 	for (int i = 0; i < 360; i++) {
 		angle = i * 3.141592 / 180;
@@ -189,6 +191,7 @@ void display() {
 	}
 	glEnd();
 
+	//Æ÷½Å
 	glLineWidth(gunBarrel.width);
 	glBegin(GL_LINES); // Gun Barrel
 	glColor3f(1.0, 1.0, 1.0);
@@ -197,7 +200,7 @@ void display() {
 	glEnd();
 
 	vector<Wheel>::iterator w;
-	for (w = wheels.begin(); w != wheels.end(); w++) {
+	for (w = wheels.begin(); w != wheels.end(); w++) { //ÅÊÅ©ÀÇ ¹ÙÄû
 		glBegin(GL_POLYGON);	// wheels
 		glColor3f(1.0, 1.0, 1.0);
 		for (int i = 0; i < 360; i++) {
@@ -208,6 +211,7 @@ void display() {
 		}
 		glEnd();
 
+		/*¹ÙÄû»ì begin*/
 		glLineWidth(3.0);
 		glBegin(GL_LINE_LOOP);
 		glColor3f(0.7, 0.7, 0.7);
@@ -230,8 +234,10 @@ void display() {
 			glEnd();
 			glLoadIdentity();
 		}
+		/*¹ÙÄû»ì end*/
 	}
 
+	//¶¥(ground)
 	glLineWidth(ground.width);
 	glBegin(GL_LINES); // ground
 	glColor3f(1.0, 0.0, 0.0);
