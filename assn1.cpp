@@ -1,9 +1,5 @@
 #include "objects.h"
 
-#define scaleFactor 0.01
-
-using namespace std;
-
 Tank tank;
 Ground ground;
 vector<CannonBall> cannonBalls;
@@ -29,25 +25,29 @@ void display() {
 	float angle, x, y;
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	ground.draw();
+
+	glPushMatrix();
+	glTranslatef(tank.get_dx(), tank.get_dy(), 0.0);
+	tank.draw();
+
 	vector<CannonBall>::iterator c;
 	for (c = cannonBalls.begin(); c != cannonBalls.end(); c++) { //Æ÷Åº
-		c->draw(tank.get_dx(), tank.get_dy());
+		c->draw();
 	}
-	glTranslatef(tank.get_dx(), tank.get_dy(), 0);
-	tank.draw();
-	glLoadIdentity();
-	ground.draw();
+	glPopMatrix();
 
 	glutSwapBuffers();
 }
 
 void timer(int v) {
 	vector<CannonBall>::iterator c;
+	float angle = tank.gunBarrel_theta() * PI / 180;
 	for (c = cannonBalls.begin(); c != cannonBalls.end(); c++) {
 		if (c->getIsFlying()) {
 			c->elapseTime();
-			c->move_dx(scaleFactor * c->getInitSpeed() * tank.gunBarrel_cos());
-			c->move_dy(scaleFactor * (-9.8 * c->getT() + c->getInitSpeed() * tank.gunBarrel_sin()));
+			c->move_dx(scaleFactor * c->getInitSpeed() * tank.gunBarrel_length() * cos(angle));
+			c->move_dy(scaleFactor * (-9.8 * c->getT() + c->getInitSpeed() * tank.gunBarrel_length() * sin(angle)));
 			if (c->get_dy() - c->getR() < -0.3) {
 				c->setIsFlying(false);
 			}
@@ -75,13 +75,13 @@ void specialkeyboard(int key, int x, int y) { //moving tank
 	vector<Wheel>::iterator w;
 	switch (key) {
 	case GLUT_KEY_RIGHT:
-		if (tank.rightPos() + tank.get_dx() >= ground.getX2())
+		if (tank.rightPos() >= ground.getX2())
 			break;
 		tank.move_dx(0.01);
 		break;
 
 	case GLUT_KEY_LEFT:
-		if (tank.leftPos() + tank.get_dx() <= ground.getX1())
+		if (tank.leftPos() <= ground.getX1())
 			break;
 		tank.move_dx(-0.01);
 		break;
