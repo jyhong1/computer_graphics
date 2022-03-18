@@ -1,5 +1,6 @@
 1. dir 구성
 	1) assn1.cpp
+	2) objects.h
 
 2. Key
 	1) left, right(좌, 우) : tank 를 좌우로 이동가능.
