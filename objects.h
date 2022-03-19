@@ -50,7 +50,7 @@ public:
 
 class GunBarrel : public Line { //Æ÷½Å
 protected:
-	float theta, dx, dy;
+	float theta, dx, dy, initial_speed;
 public:
 	void init() {
 		width = 0.3;
@@ -58,11 +58,18 @@ public:
 		theta = 30;
 		dx = 0;
 		dy = 0;
+		initial_speed = 30;
 	}
 
 	float getTheta() { return theta; }
 	float getX2() { return length * cos(theta * PI / 180) + dx; }
 	float getY2() { return length * sin(theta * PI / 180) + dy; }
+	float getInitialSpeed() { return initial_speed; }
+	void chageInitialSpeed(float dv) { 
+		if (initial_speed + dv <= 0)
+			initial_speed = 1.0;
+		else initial_speed += dv; 
+	}
 
 	void draw() {
 		glPushMatrix();
@@ -79,6 +86,11 @@ public:
 
 	void move_dx(float dx) {
 		this->dx += dx;
+	}
+
+	void chage_theta(float theta) {
+		if((this->theta + theta) <= 90 && (this->theta + theta) >= 0)
+			this->theta += theta;
 	}
 };
 
@@ -162,13 +174,13 @@ protected:
 	bool isFlying;
 
 public:
-	void init(float dx, float dy) {
+	void init(float dx, float dy, float dv){
 		this->dx = dx;
 		this->dy = dy;
 		r = 0.05;
 		isFlying = false;
 		t = 0;
-		initSpeed = 30;
+		this->initSpeed = dv;
 	}
 
 	bool getIsFlying() { return isFlying; }
@@ -178,6 +190,7 @@ public:
 	void setIsFlying(bool b) { isFlying = b; }
 	void elapseTime() { t += 0.05; }
 	void move_dy(float dy) { this->dy += dy; }
+	void change_initSpeed(float dv) { this->initSpeed += dv; }
 
 	void draw() {
 		float angle, x, y;
@@ -284,8 +297,11 @@ public:
 	float gunBarrel_X2() { return gunBarrel.getX2(); }
 	float gunBarrel_Y2() { return gunBarrel.getY2(); }
 	float gunBarrel_theta() { return gunBarrel.getTheta(); }
+	float gunBarrel_InitialSpeed() { return gunBarrel.getInitialSpeed(); }
+	void gunBarrel_chageInitialSpeed(float dv) { gunBarrel.chageInitialSpeed(dv); }
 	float rightPos() { return lowerBody.get_dx() + lowerBody.getWidth() + dx; }
 	float leftPos() { return lowerBody.get_dx() + dx; }
+	
 
 	void draw() {
 		lowerBody.draw();
@@ -305,5 +321,9 @@ public:
 		for (w = wheels.begin(); w != wheels.end(); w++) {
 			w->move_dx(dx);
 		}
+	}
+
+	void chage_theta(float theta) {
+		gunBarrel.chage_theta(theta);
 	}
 };

@@ -62,12 +62,31 @@ void timer(int v) {
 }
 
 void keyboard(unsigned char key, int x, int y) {
-	if (key == ' ') {	// shooting cannon balls
-		CannonBall c;
-		c.init(tank.gunBarrel_X2(), tank.gunBarrel_Y2());
-		c.setIsFlying(true);
-		cannonBalls.push_back(c);
+	switch (key) {
+		case ' ': 	// shooting cannon balls
+			CannonBall c;
+			c.init(tank.gunBarrel_X2(), tank.gunBarrel_Y2(), tank.gunBarrel_InitialSpeed());
+			c.setIsFlying(true);
+			cannonBalls.push_back(c);
+			break;
+
+		case 'w': //move gunbarrel counter clockwise
+			tank.chage_theta(3.0);
+			break;
+
+		case 's': //move gunbarrel clockwise
+			tank.chage_theta(-3.0);
+			break;
+
+		case 'e': //power up
+			tank.gunBarrel_chageInitialSpeed(3.0);
+			break;
+
+		case 'q': //power down
+			tank.gunBarrel_chageInitialSpeed(-3.0);
+			break;
 	}
+
 	glutPostRedisplay();
 }
 
