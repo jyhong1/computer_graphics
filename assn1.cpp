@@ -46,8 +46,8 @@ void timer(int v) {
 	for (c = cannonBalls.begin(); c != cannonBalls.end(); c++) {
 		if (c->getIsFlying()) {
 			c->elapseTime();
-			c->move_dx(scaleFactor * c->getInitSpeed() * tank.gunBarrel_length() * cos(angle));
-			c->move_dy(scaleFactor * (-9.8 * c->getT() + c->getInitSpeed() * tank.gunBarrel_length() * sin(angle)));
+			c->move_dx(scaleFactor * c->getSpeed() * tank.gunBarrel_length() * cos(angle));
+			c->move_dy(scaleFactor * (-9.8 * c->getT() + c->getSpeed() * tank.gunBarrel_length() * sin(angle)));
 			if (c->get_dy() - c->getR() < -0.3) {
 				c->setIsFlying(false);
 			}
@@ -63,28 +63,28 @@ void timer(int v) {
 
 void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
-		case ' ': 	// shooting cannon balls
-			CannonBall c;
-			c.init(tank.gunBarrel_X2(), tank.gunBarrel_Y2(), tank.gunBarrel_InitialSpeed());
-			c.setIsFlying(true);
-			cannonBalls.push_back(c);
-			break;
+	case ' ': 	// shooting cannon balls
+		CannonBall c;
+		c.init(tank.gunBarrel_X2(), tank.gunBarrel_Y2(), tank.gunBarrel_Speed());
+		c.setIsFlying(true);
+		cannonBalls.push_back(c);
+		break;
 
-		case 'w': //move gunbarrel counter clockwise
-			tank.chage_theta(3.0);
-			break;
+	case 'w': //move gunbarrel counter clockwise
+		tank.chage_theta(3.0);
+		break;
 
-		case 's': //move gunbarrel clockwise
-			tank.chage_theta(-3.0);
-			break;
+	case 's': //move gunbarrel clockwise
+		tank.chage_theta(-3.0);
+		break;
 
-		case 'e': //power up
-			tank.gunBarrel_chageInitialSpeed(3.0);
-			break;
+	case 'e': //power up
+		tank.gunBarrel_chageInitialSpeed(3.0);
+		break;
 
-		case 'q': //power down
-			tank.gunBarrel_chageInitialSpeed(-3.0);
-			break;
+	case 'q': //power down
+		tank.gunBarrel_chageInitialSpeed(-3.0);
+		break;
 	}
 
 	glutPostRedisplay();
@@ -111,8 +111,8 @@ void specialkeyboard(int key, int x, int y) { //moving tank
 void main(int argc, char** argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowPosition(100, 100);
-	glutInitWindowSize(1000, 700);
+	glutInitWindowPosition(0.0, 0.0);
+	glutInitWindowSize(1500, 900);
 
 	glutCreateWindow("fortress_assn1");
 	init();

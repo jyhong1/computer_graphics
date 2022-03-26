@@ -28,8 +28,8 @@ protected:
 	float x1, x2, y1, y2;
 public:
 	void init() {
-		x1 = -2.0;
-		x2 = 2.0;
+		x1 = -3.5;
+		x2 = 3.5;
 		y1 = -0.31;
 		y2 = -0.31;
 		width = 0.5;
@@ -50,25 +50,29 @@ public:
 
 class GunBarrel : public Line { //Æ÷½Å
 protected:
-	float theta, dx, dy, initial_speed;
+	float theta, dx, dy, dv;
+	const float InitSpeed = 30.0, MaxSpeed = 60.0;
 public:
 	void init() {
-		width = 0.3;
+		width = 1.5;
 		length = 0.33;
 		theta = 30;
 		dx = 0;
 		dy = 0;
-		initial_speed = 30;
+		dv = 0;
 	}
 
 	float getTheta() { return theta; }
 	float getX2() { return length * cos(theta * PI / 180) + dx; }
 	float getY2() { return length * sin(theta * PI / 180) + dy; }
-	float getInitialSpeed() { return initial_speed; }
-	void chageInitialSpeed(float dv) { 
-		if (initial_speed + dv <= 0)
-			initial_speed = 1.0;
-		else initial_speed += dv; 
+	float getSpeed() { return InitSpeed + dv; }
+	void chageInitialSpeed(float dv) {
+		if (getSpeed() + dv >= MaxSpeed)
+			this->dv = MaxSpeed - InitSpeed;
+		else if (getSpeed() + dv <= 0)
+			this->dv = -InitSpeed;
+		else
+			this->dv += dv;
 	}
 
 	void draw() {
@@ -77,7 +81,7 @@ public:
 		glRotatef(theta, 0.0f, 0.0f, 1.0f);
 		glLineWidth(width);
 		glBegin(GL_LINES); // Gun Barrel
-		glColor3f(1.0, 1.0, 1.0);
+		glColor3f(1.0, 1.0 - getSpeed() / MaxSpeed, 1.0 - getSpeed() / MaxSpeed);
 		glVertex3f(0.0, 0.0, 0.0);
 		glVertex3f(length, 0.0, 0.0);
 		glEnd();
@@ -89,7 +93,7 @@ public:
 	}
 
 	void chage_theta(float theta) {
-		if((this->theta + theta) <= 90 && (this->theta + theta) >= 0)
+		if ((this->theta + theta) <= 90 && (this->theta + theta) >= 0)
 			this->theta += theta;
 	}
 };
@@ -169,28 +173,27 @@ public:
 
 class CannonBall : public UpperBody { //Æ÷Åº
 protected:
-	float initSpeed;
+	float speed;
 	float t;
 	bool isFlying;
 
 public:
-	void init(float dx, float dy, float dv){
+	void init(float dx, float dy, float dv) {
 		this->dx = dx;
 		this->dy = dy;
 		r = 0.05;
 		isFlying = false;
 		t = 0;
-		this->initSpeed = dv;
+		this->speed = dv;
 	}
 
 	bool getIsFlying() { return isFlying; }
-	float getInitSpeed() { return initSpeed; }
+	float getSpeed() { return speed; }
 	float getT() { return t; }
 	float get_dy() { return dy; }
 	void setIsFlying(bool b) { isFlying = b; }
 	void elapseTime() { t += 0.05; }
 	void move_dy(float dy) { this->dy += dy; }
-	void change_initSpeed(float dv) { this->initSpeed += dv; }
 
 	void draw() {
 		float angle, x, y;
@@ -215,13 +218,15 @@ public:
 class Wheel : public UpperBody { //ÅÊÅ©ÀÇ ¹ÙÄû
 protected:
 	Line spoke;
+	float dtheta;
 
 public:
 	void init(int i) {
 		r = 0.05;
 		dx = -0.3 + (2 * i + 1) * r;
 		dy = -0.3 + r;
-		spoke.init(2 * r, 3.0);
+		dtheta = 0.0f;
+		spoke.init(2 * r, 1.0);
 	}
 
 	void draw() {
@@ -252,7 +257,7 @@ public:
 
 		for (int i = 0; i < 3; i++) {
 			glPushMatrix();
-			glRotatef(60.0f * i, 0.0f, 0.0f, 1.0f);	// https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glRotate.xml
+			glRotatef(60.0f * i + dtheta, 0.0f, 0.0f, 1.0f);	// https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glRotate.xml
 			glBegin(GL_LINES); // spokes to show the rotation well
 			glColor3f(0.7, 0.7, 0.7);
 			glVertex3f(-spoke.getLength() / 2, 0.0, 0.0);
@@ -266,6 +271,7 @@ public:
 
 	void move_dx(float dx) {
 		this->dx += dx;
+		this->dtheta -= (dx * 180) / (this->r * PI);
 	}
 };
 
@@ -287,7 +293,7 @@ public:
 			w.init(i);
 			wheels.push_back(w);
 		}
-		dx = -1.0;
+		dx = -2.0;
 		dy = 0;
 	}
 
@@ -297,16 +303,16 @@ public:
 	float gunBarrel_X2() { return gunBarrel.getX2(); }
 	float gunBarrel_Y2() { return gunBarrel.getY2(); }
 	float gunBarrel_theta() { return gunBarrel.getTheta(); }
-	float gunBarrel_InitialSpeed() { return gunBarrel.getInitialSpeed(); }
+	float gunBarrel_Speed() { return gunBarrel.getSpeed(); }
 	void gunBarrel_chageInitialSpeed(float dv) { gunBarrel.chageInitialSpeed(dv); }
 	float rightPos() { return lowerBody.get_dx() + lowerBody.getWidth() + dx; }
 	float leftPos() { return lowerBody.get_dx() + dx; }
-	
+
 
 	void draw() {
+		gunBarrel.draw();
 		lowerBody.draw();
 		upperBody.draw();
-		gunBarrel.draw();
 		vector<Wheel>::iterator w;
 		for (w = wheels.begin(); w != wheels.end(); w++) {
 			w->draw();
