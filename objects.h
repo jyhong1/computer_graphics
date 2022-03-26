@@ -132,6 +132,10 @@ public:
 	void move_dx(float dx) {
 		this->dx += dx;
 	}
+
+	bool is_in(float x, float y) {
+		return (dx <= x && x <= dx + width && dy <= y && y <= dy + height);
+	}
 };
 
 class Circle { //¿ø
@@ -169,6 +173,10 @@ public:
 	}
 
 	void move_dx(float dx) { this->dx += dx; }
+
+	bool is_in(float x, float y) {
+		return (pow((dx - x), 2) + pow((dy - y), 2) <= pow(r, 2));
+	}
 };
 
 class CannonBall : public UpperBody { //Æ÷Åº
@@ -190,6 +198,7 @@ public:
 	bool getIsFlying() { return isFlying; }
 	float getSpeed() { return speed; }
 	float getT() { return t; }
+	float get_dx() { return dx; }
 	float get_dy() { return dy; }
 	void setIsFlying(bool b) { isFlying = b; }
 	void elapseTime() { t += 0.05; }
@@ -282,6 +291,7 @@ protected:
 	UpperBody upperBody;
 	vector<Wheel> wheels;
 	float dx, dy;
+	int life;
 
 public:
 	void init() {
@@ -295,6 +305,7 @@ public:
 		}
 		dx = -2.0;
 		dy = 0;
+		life = 3;
 	}
 
 	float get_dx() { return dx; }
@@ -307,7 +318,7 @@ public:
 	void gunBarrel_chageInitialSpeed(float dv) { gunBarrel.chageInitialSpeed(dv); }
 	float rightPos() { return lowerBody.get_dx() + lowerBody.getWidth() + dx; }
 	float leftPos() { return lowerBody.get_dx() + dx; }
-
+	int getLife() { return life;  }
 
 	void draw() {
 		gunBarrel.draw();
@@ -331,5 +342,15 @@ public:
 
 	void chage_theta(float theta) {
 		gunBarrel.chage_theta(theta);
+	}
+
+	bool is_in(float x, float y) {
+		bool ret;
+
+		ret = lowerBody.is_in(x, y) || upperBody.is_in(x, y);
+		
+		if (ret) life--;
+
+		return ret;
 	}
 };

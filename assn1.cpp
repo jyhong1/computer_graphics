@@ -12,6 +12,35 @@ void init() {
 	tank.init();
 }
 
+void draw_life(int life, float x_start) {
+	float angle, x, y, r = 0.05;
+
+	glColor3f(1.0, 1.0, 1.0);
+
+	glPushMatrix();
+	glTranslatef(x_start, -0.7, 0.0);
+
+
+	for (int j = 0; j < life; j++) {
+		glPushMatrix();
+
+		glTranslatef(j *(2 * (r + 0.03)), 0.0, 0.0);
+		glBegin(GL_POLYGON);
+		for (int i = 0; i < 360; i++) {
+
+			angle = i * PI / 180;
+			x = r * cos(angle);
+			y = r * sin(angle);
+			glVertex2f(x, y);
+		}
+		glEnd();
+
+		glPopMatrix();
+	}
+
+	glPopMatrix();
+}
+
 void reshape(int w, int h) {
 	glViewport(0.0, 0.0, w, h);
 	glMatrixMode(GL_PROJECTION);
@@ -22,7 +51,6 @@ void reshape(int w, int h) {
 }
 
 void display() {
-	float angle, x, y;
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	ground.draw();
@@ -37,6 +65,8 @@ void display() {
 	}
 	glPopMatrix();
 
+	draw_life(tank.getLife(), -3.3);
+
 	glutSwapBuffers();
 }
 
@@ -48,7 +78,7 @@ void timer(int v) {
 			c->elapseTime();
 			c->move_dx(scaleFactor * c->getSpeed() * tank.gunBarrel_length() * cos(angle));
 			c->move_dy(scaleFactor * (-9.8 * c->getT() + c->getSpeed() * tank.gunBarrel_length() * sin(angle)));
-			if (c->get_dy() - c->getR() < -0.3) {
+			if (c->get_dy() - c->getR() < -0.3 || tank.is_in(c->get_dx(), c->get_dy())) {
 				c->setIsFlying(false);
 			}
 			glutPostRedisplay();
