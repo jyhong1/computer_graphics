@@ -294,7 +294,7 @@ protected:
 	int life;
 
 public:
-	void init() {
+	void init(float dx) {
 		gunBarrel.init();
 		lowerBody.init();
 		upperBody.init();
@@ -303,8 +303,8 @@ public:
 			w.init(i);
 			wheels.push_back(w);
 		}
-		dx = -2.0;
-		dy = 0;
+		this->dx = dx;
+		this->dy = 0;
 		life = 3;
 	}
 
@@ -318,7 +318,7 @@ public:
 	void gunBarrel_chageInitialSpeed(float dv) { gunBarrel.chageInitialSpeed(dv); }
 	float rightPos() { return lowerBody.get_dx() + lowerBody.getWidth() + dx; }
 	float leftPos() { return lowerBody.get_dx() + dx; }
-	int getLife() { return life;  }
+	int getLife() { return life; }
 
 	void draw() {
 		gunBarrel.draw();
@@ -348,7 +348,7 @@ public:
 		bool ret;
 
 		ret = lowerBody.is_in(x, y) || upperBody.is_in(x, y);
-		
+
 		if (ret) life--;
 
 		return ret;
