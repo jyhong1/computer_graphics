@@ -357,7 +357,6 @@ public:
 
 	bool is_in(float x, float y) {
 		bool ret;
-
 		ret = lowerBody.is_in(x, y) || upperBody.is_in(x, y);
 
 		if (ret) life--;

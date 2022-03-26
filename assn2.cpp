@@ -28,7 +28,6 @@ void draw_life(int life, float x_start) {
 		glTranslatef(j * (2 * (r + 0.03)), 0.0, 0.0);
 		glBegin(GL_POLYGON);
 		for (int i = 0; i < 360; i++) {
-
 			angle = i * PI / 180;
 			x = r * cos(angle);
 			y = r * sin(angle);
@@ -86,16 +85,17 @@ void timer(int v) {
 			c->elapseTime();
 			c->move_dx(scaleFactor * c->getSpeed() * tank1.gunBarrel_length() * cos(angle));
 			c->move_dy(scaleFactor * (-9.8 * c->getT() + c->getSpeed() * tank1.gunBarrel_length() * sin(angle)));
-			if (c->get_dy() - c->getR() < -0.3 || tank1.is_in(c->get_dx(), c->get_dy())) {
+			if (c->get_dy() - c->getR() < -0.3 /*|| tank1.is_in(c->get_dx(), c->get_dy())*/)
 				c->setIsFlying(false);
-			}
+			if (tank2.is_in(c->get_dx() + tank1.get_dx() - tank2.get_dx(), c->get_dy() + tank1.get_dy() - tank2.get_dy()))
+				c->setIsFlying(false);
 			glutPostRedisplay();
 		}
 	}
 	while (!cannonBalls.empty() && !cannonBalls.begin()->getIsFlying()) {
 		cannonBalls.erase(cannonBalls.begin());
 	}
-	
+
 	glutTimerFunc(1000 / 50, timer, v);
 }
 
@@ -152,7 +152,7 @@ void main(int argc, char** argv) {
 	glutInitWindowPosition(0.0, 0.0);
 	glutInitWindowSize(1500, 900);
 
-	glutCreateWindow("fortress_assn1");
+	glutCreateWindow("fortress_assn2");
 	init();
 
 	glutDisplayFunc(display);
