@@ -9,8 +9,8 @@ void init() {
 	glShadeModel(GL_FLAT);
 
 	ground.init();
-	tank1.init(-2.0);
-	tank2.init(2.0);
+	tank1.init(-2.0, 1.0, 1.0, 1.0);
+	tank2.init(2.0, 1.0, 0.0, 0.0);
 }
 
 void draw_life(int life, float x_start) {
@@ -95,7 +95,7 @@ void timer(int v) {
 	while (!cannonBalls.empty() && !cannonBalls.begin()->getIsFlying()) {
 		cannonBalls.erase(cannonBalls.begin());
 	}
-
+	
 	glutTimerFunc(1000 / 50, timer, v);
 }
 
@@ -132,7 +132,7 @@ void specialkeyboard(int key, int x, int y) { //moving tank
 	vector<Wheel>::iterator w;
 	switch (key) {
 	case GLUT_KEY_RIGHT:
-		if (tank1.rightPos() >= ground.getX2())
+		if (tank1.rightPos() >= ground.getX2() || tank1.rightPos() >= tank2.leftPos())
 			break;
 		tank1.move_dx(0.01);
 		break;

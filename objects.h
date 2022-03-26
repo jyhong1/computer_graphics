@@ -52,6 +52,8 @@ class GunBarrel : public Line { //Æ÷½Å
 protected:
 	float theta, dx, dy, dv;
 	const float InitSpeed = 30.0, MaxSpeed = 60.0;
+	float r, g, b;
+
 public:
 	void init() {
 		width = 1.5;
@@ -117,7 +119,6 @@ public:
 		glPushMatrix();
 		glTranslatef(dx, dy, 0.0);
 		glBegin(GL_QUADS); //Lower Body
-		glColor3f(1.0, 1.0, 1.0);
 		glVertex2f(0.0, 0.0);
 		glVertex2f(0.0, height);
 		glVertex2f(width, height);
@@ -228,22 +229,26 @@ class Wheel : public UpperBody { //ÅÊÅ©ÀÇ ¹ÙÄû
 protected:
 	Line spoke;
 	float dtheta;
+	float red, green, blue;
 
 public:
-	void init(int i) {
+	void init(int i, float red, float green, float blue) {
 		r = 0.05;
 		dx = -0.3 + (2 * i + 1) * r;
 		dy = -0.3 + r;
 		dtheta = 0.0f;
 		spoke.init(2 * r, 1.0);
+		this->red = red;
+		this->green = green;
+		this->blue = blue;
 	}
 
 	void draw() {
 		float angle, x, y;
 		glPushMatrix();
 		glTranslatef(dx, dy, 0.0);
+		glColor3f(red, green, blue);
 		glBegin(GL_POLYGON);	// wheels
-		glColor3f(1.0, 1.0, 1.0);
 		for (int i = 0; i < 360; i++) {
 			angle = i * PI / 180;
 			x = r * cos(angle);
@@ -292,20 +297,25 @@ protected:
 	vector<Wheel> wheels;
 	float dx, dy;
 	int life;
+	float r, g, b;
+
 
 public:
-	void init(float dx) {
+	void init(float dx, float r, float g, float b) {
 		gunBarrel.init();
 		lowerBody.init();
 		upperBody.init();
 		for (int i = 0; i < 6; i++) {
 			Wheel w;
-			w.init(i);
+			w.init(i, r, g, b);
 			wheels.push_back(w);
 		}
 		this->dx = dx;
 		this->dy = 0;
 		life = 3;
+		this->r = r;
+		this->g = g;
+		this->b = b;
 	}
 
 	float get_dx() { return dx; }
@@ -322,6 +332,7 @@ public:
 
 	void draw() {
 		gunBarrel.draw();
+		glColor3f(r, g, b);
 		lowerBody.draw();
 		upperBody.draw();
 		vector<Wheel>::iterator w;
