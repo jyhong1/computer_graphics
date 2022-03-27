@@ -2,12 +2,12 @@
 
 Tank tank1, tank2;
 Ground ground;
-vector<CannonBall> cannonBalls;
+vector<CannonBall> cannonBalls, cannonBalls1;
 
 void init() {
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glShadeModel(GL_FLAT);
-
+	
 	ground.init();
 	tank1.init(-2.0, 1.0, 1.0, 1.0);
 	tank2.init(2.0, 1.0, 0.0, 0.0);
@@ -68,6 +68,11 @@ void display() {
 	glPushMatrix();
 	glTranslatef(tank2.get_dx(), tank2.get_dy(), 0.0);
 	glScalef(-1.0, 1.0, 0.0);
+
+	vector<CannonBall>::iterator d;
+	for (d = cannonBalls1.begin(); d != cannonBalls1.end(); d++) { //Æ÷Åº
+		d->draw();
+	}
 	tank2.draw();
 	glPopMatrix();
 
@@ -92,6 +97,7 @@ void timer(int v) {
 			glutPostRedisplay();
 		}
 	}
+
 	while (!cannonBalls.empty() && !cannonBalls.begin()->getIsFlying()) {
 		cannonBalls.erase(cannonBalls.begin());
 	}
@@ -99,13 +105,52 @@ void timer(int v) {
 	glutTimerFunc(1000 / 50, timer, v);
 }
 
+void timer1(int v) {
+	vector<CannonBall>::iterator d;
+	float angle = tank2.gunBarrel_theta() * PI / 180;
+	for (d = cannonBalls1.begin(); d != cannonBalls1.end(); d++) {
+		if (d->getIsFlying()) {
+			d->elapseTime();
+			d->move_dx(scaleFactor * d->getSpeed() * tank2.gunBarrel_length() * cos(angle));
+			d->move_dy(scaleFactor * (-9.8 * d->getT() + d->getSpeed() * tank2.gunBarrel_length() * sin(angle)));
+			if (d->get_dy() - d->getR() < -0.3 /*|| tank1.is_in(c->get_dx(), c->get_dy())*/)
+				d->setIsFlying(false);
+			
+			if (tank2.is_in(d->get_dx() + tank1.get_dx() - tank2.get_dx(), d->get_dy() + tank1.get_dy() - tank2.get_dy()))
+				d->setIsFlying(false);
+
+			glutPostRedisplay();
+		}
+	}
+
+	while (!cannonBalls1.empty() && !cannonBalls1.begin()->getIsFlying()) {
+		cannonBalls1.erase(cannonBalls1.begin());
+	}
+
+	glutTimerFunc(1000 / 50, timer1, v);
+}
+
+void timer2(int v) {
+	CannonBall e;
+	int a;
+
+	a = rand() % 60 + 1;
+	e.init(tank2.gunBarrel_X2(), tank2.gunBarrel_Y2(), a);
+	e.setIsFlying(true);
+	cannonBalls1.push_back(e);
+
+	glutTimerFunc(3000, timer2, v);
+}
+
 void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
 	case ' ': 	// shooting cannon balls
 		CannonBall c;
+
 		c.init(tank1.gunBarrel_X2(), tank1.gunBarrel_Y2(), tank1.gunBarrel_Speed());
 		c.setIsFlying(true);
 		cannonBalls.push_back(c);
+
 		break;
 
 	case 'w': //move gunbarrel counter clockwise
@@ -124,7 +169,6 @@ void keyboard(unsigned char key, int x, int y) {
 		tank1.gunBarrel_chageInitialSpeed(-3.0);
 		break;
 	}
-
 	glutPostRedisplay();
 }
 
@@ -147,6 +191,8 @@ void specialkeyboard(int key, int x, int y) { //moving tank
 }
 
 void main(int argc, char** argv) {
+	srand(time(NULL));
+
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(0.0, 0.0);
@@ -158,6 +204,8 @@ void main(int argc, char** argv) {
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 	glutTimerFunc(100, timer, 0);	//https://cs.lmu.edu/~ray/notes/openglexamples/ spinning square examples for moving cannonBalls
+	glutTimerFunc(100, timer1, 0);
+	glutTimerFunc(100, timer2, 0);
 	glutKeyboardFunc(keyboard);
 	glutSpecialFunc(specialkeyboard);
 	glutMainLoop();

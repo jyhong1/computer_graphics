@@ -5,6 +5,8 @@
 #include <glm/vec3.hpp>
 #include <vector>
 #include <math.h>
+#include <stdlib.h>
+#include <time.h>
 
 #define scaleFactor 0.01
 #define PI 3.141592
