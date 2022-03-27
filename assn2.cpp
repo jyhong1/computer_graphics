@@ -90,7 +90,7 @@ void timer(int v) {
 			c->elapseTime();
 			c->move_dx(scaleFactor * c->getSpeed() * tank1.gunBarrel_length() * cos(angle));
 			c->move_dy(scaleFactor * (-9.8 * c->getT() + c->getSpeed() * tank1.gunBarrel_length() * sin(angle)));
-			if (c->get_dy() - c->getR() < -0.3 /*|| tank1.is_in(c->get_dx(), c->get_dy())*/)
+			if (c->get_dy() - c->getR() < -0.3 || tank1.is_in(c->get_dx(), c->get_dy()))
 				c->setIsFlying(false);
 			if (tank2.is_in(c->get_dx() + tank1.get_dx() - tank2.get_dx(), c->get_dy() + tank1.get_dy() - tank2.get_dy()))
 				c->setIsFlying(false);
