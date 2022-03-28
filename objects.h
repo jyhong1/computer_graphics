@@ -300,7 +300,7 @@ protected:
 	GunBarrel gunBarrel;
 	LowerBody lowerBody;
 	UpperBody upperBody;
-	vector<Wheel> wheels;
+	Wheel wheels[6];
 	vector<CannonBall> cannonBalls;
 
 	float dx, dy;
@@ -316,7 +316,7 @@ public:
 		for (int i = 0; i < 6; i++) {
 			Wheel w;
 			w.init(i, r, g, b);
-			wheels.push_back(w);
+			wheels[i] = w;
 		}
 		this->dx = dx;
 		this->dy = 0;
@@ -325,6 +325,7 @@ public:
 		this->g = g;
 		this->b = b;
 		fail = false;
+		cannonBalls.clear();
 	}
 
 	float get_dx() { return dx; }
@@ -349,9 +350,8 @@ public:
 		glColor3f(r, g, b);
 		lowerBody.draw();
 		upperBody.draw();
-		vector<Wheel>::iterator w;
-		for (w = wheels.begin(); w != wheels.end(); w++) {
-			w->draw();
+		for (int i = 0; i < 6; i++) {
+			wheels[i].draw();
 		}
 		vector<CannonBall>::iterator c;
 		for (c = cannonBalls.begin(); c != cannonBalls.end(); c++) { //Æ÷Åº
@@ -364,9 +364,8 @@ public:
 		gunBarrel.move_dx(dx);
 		lowerBody.move_dx(dx);
 		upperBody.move_dx(dx);
-		vector<Wheel>::iterator w;
-		for (w = wheels.begin(); w != wheels.end(); w++) {
-			w->move_dx(dx);
+		for (int i = 0; i < 6; i++) {
+			wheels[i].move_dx(dx);
 		}
 	}
 
@@ -377,9 +376,8 @@ public:
 	bool is_in(float x, float y) {
 		bool ret;
 		ret = lowerBody.is_in(x, y) || upperBody.is_in(x, y);
-		vector<Wheel>::iterator w;
-		for (w = wheels.begin(); w != wheels.end(); w++) {
-			ret = ret || w->is_in(x, y);
+		for (int i = 0; i < 6; i++) {
+			ret = ret || wheels[i].is_in(x, y);
 		}
 
 		if (ret) {

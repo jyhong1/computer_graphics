@@ -2,6 +2,7 @@
 
 Tank tank1, tank2;
 Ground ground;
+bool isEnd = false;
 
 void init() {
 	glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -63,85 +64,108 @@ void display() {
 	draw_life(tank1.getLife(), -3.3);
 	draw_life(tank2.getLife(), 3.0);
 
+	isEnd = (tank1.getLife() <= 0) || (tank2.getLife() <= 0);
+	if (isEnd) {
+		//Text Rendering http://openglut.sourceforge.net/group__bitmapfont.html
+		glRasterPos2f(0, 3.0);
+		if (tank1.getLife() <= 0)
+			glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24, (unsigned char*)"LOSE\nPress Space to Restart");
+		else
+			glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24, (unsigned char*)"WIN\nPress Space to Restart");
+	}
 	glutSwapBuffers();
 }
 
 void timer(int v) {
-	tank1.update(&tank2);
-	tank2.update(&tank1);
-
+	if (!isEnd) {
+		tank1.update(&tank2);
+		tank2.update(&tank1);
+	}
 	glutTimerFunc(1000 / 50, timer, v);
 }
 
 void tank2UpdateStateTimer(int v) {
-	int a = rand() % 2;
-	int randVal[2] = { -1, 1 };
-	tank2.chage_theta(3.0 * v);
-	tank2.gunBarrel_chageSpeed(3.0 * randVal[a]);
+	if (!isEnd) {
+		int a = rand() % 2;
+		int randVal[2] = { -1, 1 };
+		tank2.chage_theta(3.0 * v);
+		tank2.gunBarrel_chageSpeed(3.0 * randVal[a]);
 
-	glutPostRedisplay();
-
+		glutPostRedisplay();
+	}
 	if (tank2.gunBarrel_theta() <= 15 || tank2.gunBarrel_theta() >= 60)
-		glutTimerFunc(403, tank2UpdateStateTimer, -v);
+		glutTimerFunc(1003, tank2UpdateStateTimer, -v);
 	else
-		glutTimerFunc(403, tank2UpdateStateTimer, v);
+		glutTimerFunc(1003, tank2UpdateStateTimer, v);
 }
 
 void tank2FireTimer(int v) {
-	CannonBall e;
+	if (!isEnd) {
+		CannonBall e;
 
-	tank2.addCannonBall();
-
+		tank2.addCannonBall();
+	}
 	glutTimerFunc(3000, tank2FireTimer, v);
 }
 
 void keyboard(unsigned char key, int x, int y) {
-	switch (key) {
-	case ' ': 	// shooting cannon balls
-		tank1.addCannonBall();
-		break;
+	if (!isEnd) {
+		switch (key) {
+		case ' ': 	// shooting cannon balls
+			tank1.addCannonBall();
+			break;
 
-	case 'w': //move gunbarrel counter clockwise
-		tank1.chage_theta(3.0);
-		break;
+		case 'w': //move gunbarrel counter clockwise
+			tank1.chage_theta(3.0);
+			break;
 
-	case 's': //move gunbarrel clockwise
-		tank1.chage_theta(-3.0);
-		break;
+		case 's': //move gunbarrel clockwise
+			tank1.chage_theta(-3.0);
+			break;
 
-	case 'e': //power up
-		tank1.gunBarrel_chageSpeed(3.0);
-		break;
+		case 'e': //power up
+			tank1.gunBarrel_chageSpeed(3.0);
+			break;
 
-	case 'q': //power down
-		tank1.gunBarrel_chageSpeed(-3.0);
-		break;
-	case 'c':
-		tank2.changeFail();
-		break;
-	case 'f':
-		tank1.changeFail();
-		break;
+		case 'q': //power down
+			tank1.gunBarrel_chageSpeed(-3.0);
+			break;
+
+		case 'c': //all pass
+			tank2.changeFail();
+			break;
+
+		case 'f': // all fail
+			tank1.changeFail();
+			break;
+		}
+		glutPostRedisplay();
 	}
-	glutPostRedisplay();
+	else {
+		if (key == ' ') {	//restart
+			isEnd = false;
+			init();
+		}
+	}
 }
 
 void specialkeyboard(int key, int x, int y) { //moving tank
-	vector<Wheel>::iterator w;
-	switch (key) {
-	case GLUT_KEY_RIGHT:
-		if (tank1.rightPos() >= ground.getX2() || tank1.rightPos() >= -tank2.rightPos())
+	if (!isEnd) {
+		switch (key) {
+		case GLUT_KEY_RIGHT:
+			if (tank1.rightPos() >= ground.getX2() || tank1.rightPos() >= -tank2.rightPos())
+				break;
+			tank1.move_dx(0.01);
 			break;
-		tank1.move_dx(0.01);
-		break;
 
-	case GLUT_KEY_LEFT:
-		if (tank1.leftPos() <= ground.getX1())
+		case GLUT_KEY_LEFT:
+			if (tank1.leftPos() <= ground.getX1())
+				break;
+			tank1.move_dx(-0.01);
 			break;
-		tank1.move_dx(-0.01);
-		break;
+		}
+		glutPostRedisplay();
 	}
-	glutPostRedisplay();
 }
 
 void main(int argc, char** argv) {
