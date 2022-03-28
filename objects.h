@@ -70,6 +70,9 @@ public:
 	float getX2() { return length * cos(theta * PI / 180) + dx; }
 	float getY2() { return length * sin(theta * PI / 180) + dy; }
 	float getSpeed() { return InitSpeed + dv; }
+	void setThetaToInit() { this->theta = 30; }
+	void setSpeedToInit() { this->dv = 0; }
+
 	void chageSpeed(float dv) {
 		if (getSpeed() + dv >= MaxSpeed)
 			this->dv = MaxSpeed - InitSpeed;
@@ -336,11 +339,14 @@ public:
 	float gunBarrel_theta() { return gunBarrel.getTheta(); }
 	float gunBarrel_Speed() { return gunBarrel.getSpeed(); }
 	void gunBarrel_chageSpeed(float dv) { gunBarrel.chageSpeed(dv); }
+	void gunBarrel_setSpeedToInit() { gunBarrel.setSpeedToInit(); }
+	void gunBarrel_setThetaToInit() { gunBarrel.setThetaToInit(); }
 	float rightPos() { return lowerBody.get_dx() + lowerBody.getWidth() + dx; }
 	float leftPos() { return lowerBody.get_dx() + dx; }
 	float getWorldCoordX(float x) { return x + dx; }
 	float getWorldCoordY(float y) { return y + dy; }
 	int getLife() { return life; }
+	bool getFail() { return fail; }
 	void changeFail() { fail = !fail; }
 
 	void draw() {

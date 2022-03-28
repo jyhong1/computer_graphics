@@ -86,17 +86,22 @@ void timer(int v) {
 
 void tank2UpdateStateTimer(int v) {
 	if (!isEnd) {
-		int a = rand() % 2;
-		int randVal[2] = { -1, 1 };
-		tank2.chage_theta(3.0 * v);
-		tank2.gunBarrel_chageSpeed(3.0 * randVal[a]);
-
+		if (!tank1.getFail()) {
+			int a = rand() % 2;
+			int randVal[2] = { -1, 1 };
+			tank2.chage_theta(3.0 * v);
+			tank2.gunBarrel_chageSpeed(3.0 * randVal[a]);
+		}
+		else {
+			tank2.gunBarrel_setThetaToInit();
+			tank2.gunBarrel_setSpeedToInit();
+		}
 		glutPostRedisplay();
 	}
 	if (tank2.gunBarrel_theta() <= 15 || tank2.gunBarrel_theta() >= 60)
-		glutTimerFunc(1003, tank2UpdateStateTimer, -v);
+		glutTimerFunc(403, tank2UpdateStateTimer, -v);
 	else
-		glutTimerFunc(1003, tank2UpdateStateTimer, v);
+		glutTimerFunc(403, tank2UpdateStateTimer, v);
 }
 
 void tank2FireTimer(int v) {
