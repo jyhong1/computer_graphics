@@ -70,7 +70,7 @@ public:
 	float getX2() { return length * cos(theta * PI / 180) + dx; }
 	float getY2() { return length * sin(theta * PI / 180) + dy; }
 	float getSpeed() { return InitSpeed + dv; }
-	void chageInitialSpeed(float dv) {
+	void chageSpeed(float dv) {
 		if (getSpeed() + dv >= MaxSpeed)
 			this->dv = MaxSpeed - InitSpeed;
 		else if (getSpeed() + dv <= 0)
@@ -289,6 +289,10 @@ public:
 		this->dx += dx;
 		this->dtheta -= (dx * 180) / (this->r * PI);
 	}
+
+	bool is_in(float x, float y) {
+		return (x >= dx - r && x <= dx + r) && (y >= dy - r && y <= dy + r);
+	}
 };
 
 class Tank {
@@ -297,10 +301,12 @@ protected:
 	LowerBody lowerBody;
 	UpperBody upperBody;
 	vector<Wheel> wheels;
+	vector<CannonBall> cannonBalls;
+
 	float dx, dy;
 	int life;
 	float r, g, b;
-
+	bool fail;
 
 public:
 	void init(float dx, float r, float g, float b) {
@@ -318,6 +324,7 @@ public:
 		this->r = r;
 		this->g = g;
 		this->b = b;
+		fail = false;
 	}
 
 	float get_dx() { return dx; }
@@ -327,12 +334,17 @@ public:
 	float gunBarrel_Y2() { return gunBarrel.getY2(); }
 	float gunBarrel_theta() { return gunBarrel.getTheta(); }
 	float gunBarrel_Speed() { return gunBarrel.getSpeed(); }
-	void gunBarrel_chageInitialSpeed(float dv) { gunBarrel.chageInitialSpeed(dv); }
+	void gunBarrel_chageSpeed(float dv) { gunBarrel.chageSpeed(dv); }
 	float rightPos() { return lowerBody.get_dx() + lowerBody.getWidth() + dx; }
 	float leftPos() { return lowerBody.get_dx() + dx; }
+	float getWorldCoordX(float x) { return x + dx; }
+	float getWorldCoordY(float y) { return y + dy; }
 	int getLife() { return life; }
+	void changeFail() { fail = !fail; }
 
 	void draw() {
+		glPushMatrix();
+		glTranslatef(dx, dy, 0.0);
 		gunBarrel.draw();
 		glColor3f(r, g, b);
 		lowerBody.draw();
@@ -341,6 +353,11 @@ public:
 		for (w = wheels.begin(); w != wheels.end(); w++) {
 			w->draw();
 		}
+		vector<CannonBall>::iterator c;
+		for (c = cannonBalls.begin(); c != cannonBalls.end(); c++) { //Æ÷Åº
+			c->draw();
+		}
+		glPopMatrix();
 	}
 
 	void move_dx(float dx) {
@@ -360,9 +377,49 @@ public:
 	bool is_in(float x, float y) {
 		bool ret;
 		ret = lowerBody.is_in(x, y) || upperBody.is_in(x, y);
+		vector<Wheel>::iterator w;
+		for (w = wheels.begin(); w != wheels.end(); w++) {
+			ret = ret || w->is_in(x, y);
+		}
 
-		if (ret) life--;
+		if (ret) {
+			if (!fail)
+				life--;
+			else
+				life = 0;
+		}
 
 		return ret;
+	}
+
+	void addCannonBall() {
+		if (!fail) {
+			CannonBall c;
+
+			c.init(gunBarrel_X2(), gunBarrel_Y2(), gunBarrel_Speed());
+			c.setIsFlying(true);
+			cannonBalls.push_back(c);
+		}
+	}
+
+	void update(Tank* t) {
+		vector<CannonBall>::iterator c;
+		float angle = gunBarrel_theta() * PI / 180;
+		for (c = cannonBalls.begin(); c != cannonBalls.end(); c++) {
+			if (c->getIsFlying()) {
+				c->elapseTime();
+				c->move_dx(scaleFactor * c->getSpeed() * gunBarrel_length() * cos(angle));
+				c->move_dy(scaleFactor * (-9.8 * c->getT() + c->getSpeed() * gunBarrel_length() * sin(angle)));
+				if (is_in(c->get_dx(), c->get_dy()) || c->get_dy() - c->getR() < -0.3)
+					c->setIsFlying(false);
+				if (t->is_in(-(getWorldCoordX(c->get_dx())) - t->get_dx(), getWorldCoordY(c->get_dy()) - t->get_dy()))
+					c->setIsFlying(false);
+				glutPostRedisplay();
+			}
+		}
+
+		while (!cannonBalls.empty() && !cannonBalls.begin()->getIsFlying()) {
+			cannonBalls.erase(cannonBalls.begin());
+		}
 	}
 };
